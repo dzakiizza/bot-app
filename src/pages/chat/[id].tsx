@@ -168,6 +168,7 @@ export default function Chat() {
                     p={"3"}
                     m={"1"}
                     justify={"center"}
+                    color={"black"}
                   >
                     {cht.user_message}
                   </Flex>
@@ -181,6 +182,8 @@ export default function Chat() {
                     p={"3"}
                     m={"1"}
                     justify={"center"}
+                    color={"black"}
+
                   >
                     {cht.bot_message}
                   </Flex>
