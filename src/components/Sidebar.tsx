@@ -17,6 +17,7 @@ import ModalBot from "./ModalBot";
 import { BotInstance } from "@/interfaces/interface";
 import useSWR from "swr";
 import { useRouter } from "next/router";
+import { css } from "@emotion/react";
 
 export const MessageList = (props: {
   bot: BotInstance;
@@ -72,7 +73,7 @@ export default function Sidebar() {
       w={{ lg: "420px", md: "320px" }}
       display={{ base: router.pathname === "/" ? "flex" : "none", md: "flex" }}
       borderEnd={"1px solid"}
-      borderColor={"gray.600"}
+      borderColor={{base: "gray.900", md: "gray.600"}}
       direction={"column"}
       bg={"gray.900"}
     >
@@ -104,6 +105,13 @@ export default function Sidebar() {
         overflowX={"scroll"}
         direction={"column"}
         sx={{ scrollbarWidth: "none" }}
+        css={css`
+        ::-webkit-scrollbar {
+          display: none;
+          -ms-overflow-style: none
+          scrollbar-width: none; 
+        }
+      `}
         flex={1}
         align={"center"}
       >

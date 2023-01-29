@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { BiSend } from "react-icons/bi";
 import { PulseLoader } from "react-spinners";
 import produce from "immer";
+import { css } from "@emotion/react";
 
 const override: CSSProperties = {
   display: "block",
@@ -125,10 +126,18 @@ export default function Chat() {
         <Flex
           flex={1}
           direction={"column"}
-          pt={4}
+          pt={{ base: "100px", md: 4 }}
+          pb={{ base: "180px", md: 4 }}
           mx={5}
           overflowX={"scroll"}
           sx={{ scrollbarWidth: "none" }}
+          css={css`
+            ::-webkit-scrollbar {
+              display: none;
+              -ms-overflow-style: none
+              scrollbar-width: none; 
+            }
+          `}
           gap={4}
         >
           {isConvoLoading || isValidating ? (
@@ -186,6 +195,9 @@ export default function Chat() {
           )}
         </Flex>
         <Flex
+          w={"full"}
+          pos={{ base: "fixed", md: "unset" }}
+          bottom={{ base: "0", md: undefined }}
           h={"81px"}
           borderTop={"1px solid"}
           borderColor={"gray.600"}

@@ -37,6 +37,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { MessageList } from "./Sidebar";
 import useSWR from "swr";
 import ModalBot from "./ModalBot";
+import { css } from "@emotion/react";
 
 function DrawerBar(props: {
   isOpen: boolean;
@@ -64,7 +65,7 @@ function DrawerBar(props: {
     <Drawer isOpen={props.isOpen} placement="left" onClose={props.onClose}>
       <DrawerOverlay />
       <DrawerContent bg={"gray.900"}>
-        <DrawerCloseButton color={"teal.400"} mt={2} />
+        <DrawerCloseButton color={"teal.400"} mt={2} _focus={{}}/>
         <DrawerHeader borderBottom={"1px solid"} borderColor={"gray.600"}>
           <Image src={"/assets/feedloopLight.svg"} width={"150px"} />
         </DrawerHeader>
@@ -86,6 +87,13 @@ function DrawerBar(props: {
             overflowX={"scroll"}
             direction={"column"}
             sx={{ scrollbarWidth: "none" }}
+            css={css`
+            ::-webkit-scrollbar {
+              display: none;
+              -ms-overflow-style: none
+              scrollbar-width: none; 
+            }
+          `}
             flex={1}
             align={"center"}
             w={"full"}
@@ -308,6 +316,8 @@ export default function Topbar(props: {
       justify={"space-between"}
       borderBottom={"1px solid"}
       borderColor={"gray.600"}
+      pos={{ base: "fixed", md: "unset" }}
+      top={{ base: "0", md: undefined }}
     >
       <Flex align={"center"} gap={4}>
         <IconButton
