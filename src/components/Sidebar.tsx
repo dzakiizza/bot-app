@@ -18,19 +18,25 @@ import { BotInstance } from "@/interfaces/interface";
 import useSWR from "swr";
 import { useRouter } from "next/router";
 
-const MessageList = (props: { bot: BotInstance }) => {
+export const MessageList = (props: {
+  bot: BotInstance;
+  onClose?: () => void;
+}) => {
   const router = useRouter();
 
   return (
     <Flex
-      p={"3"}
+      p={3}
       align={"center"}
-      w={"90%"}
+      w={{ base: "full", md: "90%" }}
       _hover={{ bg: "gray.700", cursor: "pointer" }}
       border={"1px solid"}
       borderColor={router.query.id === props.bot.id ? "teal.600" : "gray.900"}
       onClick={() => {
         router.push(`/chat/${props.bot.id}`);
+        if (props.onClose) {
+          props.onClose();
+        }
       }}
       borderRadius={"md"}
     >
@@ -45,13 +51,16 @@ const MessageList = (props: { bot: BotInstance }) => {
 export default function Sidebar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { data, error, mutate, isLoading, isValidating } = useSWR<
-    BotInstance[]
-  >("/api/bots", async (endpoint: string) => {
-    const response = await axios.get(endpoint);
-    const result = await response.data;
-    return result;
-  });
+  const router = useRouter();
+
+  const { data, error, mutate } = useSWR<BotInstance[]>(
+    "/api/bots",
+    async (endpoint: string) => {
+      const response = await axios.get(endpoint);
+      const result = await response.data;
+      return result;
+    }
+  );
 
   React.useEffect(() => {
     mutate();
@@ -60,7 +69,8 @@ export default function Sidebar() {
   return (
     <Flex
       h={"100vh"}
-      w={"420px"}
+      w={{ lg: "420px", md: "320px" }}
+      display={{ base: router.pathname === "/" ? "flex" : "none", md: "flex" }}
       borderEnd={"1px solid"}
       borderColor={"gray.600"}
       direction={"column"}
@@ -89,7 +99,7 @@ export default function Sidebar() {
       >
         New Bot
       </Button>
-      <ModalBot isOpen={isOpen} onClose={onClose} mutate={mutate} />
+      <ModalBot isOpen={isOpen} onClose={onClose} />
       <Flex
         overflowX={"scroll"}
         direction={"column"}
@@ -103,7 +113,7 @@ export default function Sidebar() {
           })
         ) : (
           <Center>
-            <Spinner color={"white"}/>
+            <Spinner color={"white"} />
           </Center>
         )}
       </Flex>

@@ -16,13 +16,12 @@ import {
 import axios from "axios";
 import React from "react";
 import { useRouter } from "next/router";
-import { KeyedMutator } from "swr";
-import { BotInstance } from "@/interfaces/interface";
+import { mutate } from "swr";
 
 export default function ModalBot(props: {
   isOpen: boolean;
   onClose: () => void;
-  mutate: KeyedMutator<BotInstance[]>;
+  onCloseDrawer?: () => void;
 }) {
   const [bot, setBot] = React.useState({ name: "", prompt: "" });
   const [isSubmitting, setIsSubmiting] = React.useState(false);
@@ -39,7 +38,10 @@ export default function ModalBot(props: {
         .then((res) => {
           router.push(`/chat/${res.data.id}`);
           props.onClose();
-          props.mutate();
+          mutate("/api/bots");
+          if (props.onCloseDrawer) {
+            props.onCloseDrawer();
+          }
         });
       setIsSubmiting(false);
     } catch (err) {

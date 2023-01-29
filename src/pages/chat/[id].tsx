@@ -51,23 +51,14 @@ export default function Chat() {
     convoMutate();
   }, [router.query.id]);
 
-  const {
-    data: lastConvo,
-    error: lastErrorConvo,
-    isLoading: lastConvoLoading,
-    isValidating: lastConvoValidating,
-    mutate: lastConvoMutate,
-  } = useSWR(
-    `/api/convo?orderBy=DESC&limit=3&bot_id=${router.query.id}`,
-    async (endpoint: string) => {
-      const response = await axios.get(endpoint);
-      const result = await response.data;
-      return result;
+  const lastConversation = React.useMemo(() => {
+    if (conversations) {
+      return conversations.slice(-3);
     }
-  );
+  }, [conversations]);
 
   const { data: bot, error: errorBot } = useSWR<BotInstance>(
-    `/api/bots?bot_id=${router.query.id}`,
+    router.query.id ? `/api/bots?bot_id=${router.query.id}` : null,
     async (endpoint: string) => {
       const response = await axios.get(endpoint);
       const result = await response.data;
@@ -82,7 +73,6 @@ export default function Chat() {
         user_message: inputMessage,
         bot_id: router.query.id,
       });
-      await lastConvoMutate();
       const completion = await getCompletion();
       const patch = await axios.patch(`/api/convo?convo_id=${result.data.id}`, {
         bot_message: completion,
@@ -91,14 +81,14 @@ export default function Chat() {
       setCompletionLoading(false);
       console.log(err);
     }
-  }, [inputMessage, router, lastConvo]);
+  }, [inputMessage, router]);
 
   const getCompletion = React.useCallback(async () => {
     try {
       const result = await axios.post("/api/gpt", {
         prompt: bot?.prompt || "",
         text: inputMessage,
-        lastConvo: lastConvo?.data,
+        lastConvo: lastConversation,
       });
       setConversations((state) =>
         produce(state, (draft) => {
@@ -112,7 +102,7 @@ export default function Chat() {
       console.log(err);
       return "";
     }
-  }, [inputMessage, router, lastConvo, bot]);
+  }, [inputMessage, router, bot, lastConversation]);
 
   React.useEffect(() => {
     if (!convo) {
@@ -123,16 +113,7 @@ export default function Chat() {
         },
       ]);
     } else {
-      if (!convo.data.length) {
-        setConversations([
-          {
-            user_message: "",
-            bot_message: "",
-          },
-        ]);
-      } else {
-        setConversations(convo.data);
-      }
+      setConversations(convo.data);
     }
   }, [convo]);
 
@@ -183,7 +164,6 @@ export default function Chat() {
                     m={"1"}
                     justify={"center"}
                     color={"black"}
-
                   >
                     {cht.bot_message}
                   </Flex>

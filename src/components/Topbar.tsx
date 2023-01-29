@@ -17,12 +17,101 @@ import {
   FormLabel,
   Input,
   Textarea,
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  Image,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import React from "react";
 import { BiEditAlt, BiTrash } from "react-icons/bi";
 import { mutate } from "swr";
+import { RxHamburgerMenu } from "react-icons/rx";
+import { MessageList } from "./Sidebar";
+import useSWR from "swr";
+import ModalBot from "./ModalBot";
+
+function DrawerBar(props: {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+}) {
+  const { data, error, mutate } = useSWR<BotInstance[]>(
+    "/api/bots",
+    async (endpoint: string) => {
+      const response = await axios.get(endpoint);
+      const result = await response.data;
+      return result;
+    }
+  );
+  const {
+    isOpen: openModalBot,
+    onOpen: onOpenModalBot,
+    onClose: onCloseModalBot,
+  } = useDisclosure();
+
+  React.useEffect(() => {
+    mutate();
+  }, [data]);
+  return (
+    <Drawer isOpen={props.isOpen} placement="left" onClose={props.onClose}>
+      <DrawerOverlay />
+      <DrawerContent bg={"gray.900"}>
+        <DrawerCloseButton color={"teal.400"} mt={2} />
+        <DrawerHeader borderBottom={"1px solid"} borderColor={"gray.600"}>
+          <Image src={"/assets/feedloopLight.svg"} width={"150px"} />
+        </DrawerHeader>
+        <DrawerBody>
+          <Button
+            w={"full"}
+            my={5}
+            p={4}
+            bg={"teal.800"}
+            _hover={{ bg: "teal.600" }}
+            border={"1px solid"}
+            borderColor={"teal.300"}
+            color={"white"}
+            onClick={onOpenModalBot}
+          >
+            New Bot
+          </Button>
+          <Flex
+            overflowX={"scroll"}
+            direction={"column"}
+            sx={{ scrollbarWidth: "none" }}
+            flex={1}
+            align={"center"}
+            w={"full"}
+          >
+            {data && !error ? (
+              data.map((bot) => {
+                return (
+                  <MessageList key={bot.id} bot={bot} onClose={props.onClose} />
+                );
+              })
+            ) : (
+              <Center>
+                <Spinner color={"white"} />
+              </Center>
+            )}
+          </Flex>
+        </DrawerBody>
+        <ModalBot
+          isOpen={openModalBot}
+          onClose={onCloseModalBot}
+          onCloseDrawer={props.onClose}
+        />
+      </DrawerContent>
+    </Drawer>
+  );
+}
 
 function ModalEdit(props: {
   isOpen: boolean;
@@ -191,11 +280,22 @@ export default function Topbar(props: {
   botName: string | undefined;
   botPrompt: string | undefined;
 }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: openDeleteModal,
+    onOpen: onOpenDeleteModal,
+    onClose: onCloseDeleteModal,
+  } = useDisclosure();
+
   const {
     isOpen: openEdit,
     onOpen: onOpenEdit,
     onClose: onCloseEdit,
+  } = useDisclosure();
+
+  const {
+    isOpen: openDrawer,
+    onOpen: onOpenDrawer,
+    onClose: onCloseDrawer,
   } = useDisclosure();
 
   return (
@@ -209,9 +309,24 @@ export default function Topbar(props: {
       borderBottom={"1px solid"}
       borderColor={"gray.600"}
     >
-      <Heading size={"md"} color={"gray.200"}>
-        {props.botName || ""}
-      </Heading>
+      <Flex align={"center"} gap={4}>
+        <IconButton
+          onClick={onOpenDrawer}
+          display={{ base: "flex", md: "none" }}
+          aria-label={"drawer-button"}
+          bg={"gray.900"}
+          color={"teal.400"}
+          border={"1px solid"}
+          borderColor={"teal.400"}
+          width={"40px"}
+          _active={{}}
+          _hover={{}}
+          icon={<RxHamburgerMenu />}
+        />
+        <Heading size={"md"} color={"gray.200"}>
+          {props.botName || ""}
+        </Heading>
+      </Flex>
       <Flex gap={4}>
         <IconButton
           display={props.botName || props.botPrompt ? "flex" : "none"}
@@ -227,26 +342,25 @@ export default function Topbar(props: {
           display={props.botName || props.botPrompt ? "flex" : "none"}
           aria-label={""}
           icon={<BiTrash color={"white"} />}
-          onClick={onOpen}
+          onClick={onOpenDeleteModal}
           bg={"teal.800"}
           _hover={{ bg: "teal.600" }}
           border={"1px solid"}
           borderColor={"teal.300"}
         />
       </Flex>
-      <ModalDelete isOpen={isOpen} onClose={onClose} />
+      <ModalDelete isOpen={openDeleteModal} onClose={onCloseDeleteModal} />
       <ModalEdit
         isOpen={openEdit}
         onClose={onCloseEdit}
         botName={props.botName}
         botPrompt={props.botPrompt}
       />
+      <DrawerBar
+        isOpen={openDrawer}
+        onClose={onCloseDrawer}
+        onOpen={onOpenDrawer}
+      />
     </Flex>
   );
-}
-function useSWR<T>(
-  arg0: string,
-  arg1: (endpoint: string) => Promise<any>
-): { data: any; error: any; mutate: any } {
-  throw new Error("Function not implemented.");
 }
