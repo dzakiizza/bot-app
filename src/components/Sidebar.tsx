@@ -1,16 +1,18 @@
 import {
   Avatar,
   Button,
+  Center,
   Flex,
   Icon,
   IconButton,
   Image,
+  Spinner,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "react";
-import { BiChevronRight, BiLogOut } from "react-icons/bi";
+import { BiChevronRight } from "react-icons/bi";
 import ModalBot from "./ModalBot";
 import { BotInstance } from "@/interfaces/interface";
 import useSWR from "swr";
@@ -43,14 +45,13 @@ const MessageList = (props: { bot: BotInstance }) => {
 export default function Sidebar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { data, error, mutate } = useSWR<BotInstance[]>(
-    "/api/bots",
-    async (endpoint: string) => {
-      const response = await axios.get(endpoint);
-      const result = await response.data;
-      return result;
-    }
-  );
+  const { data, error, mutate, isLoading, isValidating } = useSWR<
+    BotInstance[]
+  >("/api/bots", async (endpoint: string) => {
+    const response = await axios.get(endpoint);
+    const result = await response.data;
+    return result;
+  });
 
   React.useEffect(() => {
     mutate();
@@ -96,11 +97,15 @@ export default function Sidebar() {
         flex={1}
         align={"center"}
       >
-        {data &&
-          !error &&
+        {data && !error ? (
           data.map((bot) => {
             return <MessageList key={bot.id} bot={bot} />;
-          })}
+          })
+        ) : (
+          <Center>
+            <Spinner color={"white"}/>
+          </Center>
+        )}
       </Flex>
     </Flex>
   );

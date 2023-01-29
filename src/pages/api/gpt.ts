@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: process.env.OPENAIAPIKEY,
 });
 const openai = new OpenAIApi(configuration);
 
@@ -70,8 +70,11 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const resp = await respond(req.body.text, req.body.prompt, req.body.lastConvo);
-
+    const resp = await respond(
+      req.body.text,
+      req.body.prompt,
+      req.body.lastConvo
+    );
     res.status(200).json(resp);
   } catch (err) {
     res.status(500).json(err);

@@ -53,7 +53,7 @@ function ModalEdit(props: {
         .then((res) => {
           props.onClose();
           mutate("/api/bots");
-          mutate(`/api/bots?bot_id=${router.query.id}`)
+          mutate(`/api/bots?bot_id=${router.query.id}`);
         });
       setIsSubmiting(false);
     } catch (err) {
@@ -113,6 +113,7 @@ function ModalEdit(props: {
           </ModalBody>
           <ModalFooter>
             <Button
+              color={"white"}
               bg={"teal.600"}
               _hover={{ bg: "teal.800" }}
               onClick={() => {
